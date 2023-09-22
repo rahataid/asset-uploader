@@ -1,5 +1,17 @@
-import AWS, { S3 } from "aws-sdk";
-import { S3UploaderConfig, UploaderAbstract } from "../types";
+import {
+  S3Client,
+  PutObjectCommand,
+  ListObjectsV2Command,
+  GetObjectCommand,
+  DeleteObjectCommand,
+  PutObjectCommandInput,
+} from "@aws-sdk/client-s3";
+import {
+  S3UploaderConfig,
+  UploadAssetParams,
+  UploaderAbstract,
+} from "../types";
+import { Readable } from "stream";
 
 export interface S3File {
   name: string;
@@ -8,34 +20,43 @@ export interface S3File {
 }
 
 class S3Uploader implements UploaderAbstract {
-  private s3: S3;
+  private s3: S3Client;
 
   constructor(private config: S3UploaderConfig) {
-    this.s3 = new AWS.S3({
-      accessKeyId: config.accessKeyId,
-      secretAccessKey: config.secretAccessKey,
+    this.s3 = new S3Client({
       region: config.region,
+      credentials: {
+        accessKeyId: config.accessKey,
+        secretAccessKey: config.secret,
+      },
     });
   }
 
-  async uploadFile(file: Buffer, fileName: string): Promise<string> {
-    const params = {
-      Bucket: this.config.bucketName,
-      Key: fileName,
-      Body: file,
+  async uploadFile(uploadParams: UploadAssetParams): Promise<any> {
+    const params: PutObjectCommandInput = {
+      Bucket: this.config.bucket,
+      Key: uploadParams.folderName + "/" + uploadParams.fileName,
+      Body: uploadParams.file,
+      ACL: "public-read",
+      ContentType: uploadParams.mimeType,
+      Tagging: uploadParams.folderName,
     };
 
-    const result = await this.s3.upload(params).promise();
+    const command = new PutObjectCommand(params);
 
-    return result.Location;
+    const result = await this.s3.send(command);
+
+    return result;
   }
 
   async listFiles(): Promise<S3File[]> {
     const params = {
-      Bucket: this.config.bucketName,
+      Bucket: this.config.bucket,
     };
 
-    const result = await this.s3.listObjectsV2(params).promise();
+    const command = new ListObjectsV2Command(params);
+
+    const result = await this.s3.send(command);
 
     if (!result.Contents || result.Contents.length === 0) {
       return [];
@@ -50,22 +71,27 @@ class S3Uploader implements UploaderAbstract {
 
   async readFile(fileName: string): Promise<Buffer> {
     const params = {
-      Bucket: this.config.bucketName,
+      Bucket: this.config.bucket,
       Key: fileName,
     };
 
-    const result = await this.s3.getObject(params).promise();
+    const command = new GetObjectCommand(params);
 
-    return (result.Body as Buffer) || Buffer.from("");
+    const result = await this.s3.send(command);
+
+    return Buffer.from("");
+    // return (result.Body as Readable) || Buffer.from("");
   }
 
   async deleteFile(fileName: string): Promise<void> {
     const params = {
-      Bucket: this.config.bucketName,
+      Bucket: this.config.bucket,
       Key: fileName,
     };
 
-    await this.s3.deleteObject(params).promise();
+    const command = new DeleteObjectCommand(params);
+
+    await this.s3.send(command);
   }
 }
 

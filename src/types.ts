@@ -1,10 +1,10 @@
 import S3Uploader from "./aws";
 
 export interface S3UploaderConfig {
-  accessKeyId: string;
-  secretAccessKey: string;
+  accessKey: string;
+  secret: string;
   region: string;
-  bucketName: string;
+  bucket: string;
 }
 
 export enum AssetAvailableUploaders {
@@ -20,7 +20,7 @@ export interface AssetUploaderInstancesConfig {
 }
 
 export interface UploaderAbstract {
-  uploadFile(file: Buffer, fileName: string): Promise<string>;
+  uploadFile(uploadParams: UploadAssetParams): Promise<string>;
 }
 
 // todo: add other uploaders here
@@ -30,3 +30,10 @@ export interface AssetUploaderInstances {
   [AssetAvailableUploaders.DigitalOcean]: S3Uploader;
   [AssetAvailableUploaders.CloudFlare]: S3Uploader;
 }
+
+export type UploadAssetParams = {
+  file: Buffer;
+  mimeType: string;
+  folderName: string;
+  fileName: string;
+};
