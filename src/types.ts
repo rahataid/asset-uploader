@@ -36,4 +36,5 @@ export type UploadAssetParams = {
   mimeType: string;
   folderName: string;
   fileName: string;
+  rootFolderName: string;
 };

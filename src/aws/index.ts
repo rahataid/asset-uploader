@@ -37,7 +37,12 @@ class S3Uploader implements UploaderAbstract {
     const fileNameHash = await Hash.of(uploadParams.fileName);
     const params: PutObjectCommandInput = {
       Bucket: this.config.bucket,
-      Key: uploadParams.folderName + "/" + fileNameHash,
+      Key:
+        uploadParams.rootFolderName +
+        "/" +
+        uploadParams.folderName +
+        "/" +
+        fileNameHash,
       Body: uploadParams.file,
       ACL: "public-read",
       ContentType: uploadParams.mimeType,
