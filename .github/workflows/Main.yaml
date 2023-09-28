@@ -26,7 +26,7 @@ jobs:
 
       - name: Read Package Version
         run: |
-          export "PACKAGE_VERSION=$(node -e 'console.log(require("./package.json").version)')"
+          export PACKAGE_VERSION=$(node -e 'console.log(require("./package.json").version)')
 
       - name: Publish package
         run: npm dist-tag add asset-uploader@$PACKAGE_VERSION latest
