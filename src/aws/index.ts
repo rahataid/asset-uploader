@@ -33,9 +33,11 @@ class S3Uploader implements UploaderAbstract {
   }
 
   async uploadFile(uploadParams: UploadAssetParams): Promise<any> {
+    const Hash = require("ipfs-only-hash");
+    const fileNameHash = await Hash.of(uploadParams.fileName);
     const params: PutObjectCommandInput = {
       Bucket: this.config.bucket,
-      Key: uploadParams.folderName + "/" + uploadParams.fileName,
+      Key: uploadParams.folderName + "/" + fileNameHash,
       Body: uploadParams.file,
       ACL: "public-read",
       ContentType: uploadParams.mimeType,
@@ -46,7 +48,10 @@ class S3Uploader implements UploaderAbstract {
 
     const result = await this.s3.send(command);
 
-    return result;
+    return {
+      ...result,
+      fileNameHash,
+    };
   }
 
   async listFiles(): Promise<S3File[]> {
