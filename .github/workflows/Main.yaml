@@ -28,6 +28,6 @@ jobs:
         run: echo "PACKAGE_VERSION=$(node -e 'console.log(require("./package.json").version)')"
 
       - name: Publish package
-        run: npm publish --access public --tag $PACKAGE_VERSION
+        run: npm dist-tag add asset-uploader@$PACKAGE_VERSION latest
         env:
           NODE_AUTH_TOKEN: ${{secrets.NODE_AUTH_TOKEN}}
