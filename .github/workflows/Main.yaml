@@ -1,0 +1,33 @@
+name: Main CICD
+
+on:
+  push:
+    branches:
+      - "main"
+
+env:
+  CI: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          registry-url: https://registry.npmjs.org/
+
+      - name: Install Yarn
+        run: npm install -g yarn
+
+      - name: Install Dependencies and Build Package
+        run: yarn
+
+      - name: Read Package Version
+        run: echo "PACKAGE_VERSION=$(node -e 'console.log(require("./package.json").version)')"
+
+      - name: Publish package
+        run: npm publish --access public --tag $PACKAGE_VERSION
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.NODE_AUTH_TOKEN}}

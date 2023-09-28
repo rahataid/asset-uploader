@@ -6,7 +6,7 @@
   "types": "lib/index.d.ts",
   "scripts": {
     "start": " nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/index.ts",
-    "build": "tsc --watch",
+    "build": "tsc",
     "prepare": "yarn build && cp -R lib/* dist/"
   },
   "keywords": [],
