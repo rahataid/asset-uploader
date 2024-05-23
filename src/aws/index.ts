@@ -60,7 +60,7 @@ class S3Uploader implements UploaderAbstract {
       fileNameHash,
     };
   }
-  async uploadFileWithoutHash(uploadParams: UploadAssetParams): Promise<any> {
+  async uploadWithFileName(uploadParams: UploadAssetParams): Promise<any> {
     const params: PutObjectCommandInput = {
       Bucket: this.config.bucket,
       Key:
